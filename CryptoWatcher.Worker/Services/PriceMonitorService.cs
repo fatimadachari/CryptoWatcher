@@ -1,3 +1,4 @@
+using CryptoWatcher.Application.DTOs.Messages;
 using CryptoWatcher.Application.Interfaces.Repositories;
 using CryptoWatcher.Application.Interfaces.Services;
 using CryptoWatcher.Domain.Entities;
@@ -8,15 +9,18 @@ public class PriceMonitorService
 {
     private readonly IAlertRepository _alertRepository;
     private readonly IPriceService _priceService;
+    private readonly IMessagePublisher _messagePublisher;
     private readonly ILogger<PriceMonitorService> _logger;
 
     public PriceMonitorService(
         IAlertRepository alertRepository,
         IPriceService priceService,
+        IMessagePublisher messagePublisher,
         ILogger<PriceMonitorService> logger)
     {
         _alertRepository = alertRepository;
         _priceService = priceService;
+        _messagePublisher = messagePublisher;
         _logger = logger;
     }
 
@@ -24,7 +28,6 @@ public class PriceMonitorService
     {
         _logger.LogInformation("?? Iniciando monitoramento de preços...");
 
-        // 1. Buscar todos os alertas ativos
         var activeAlerts = await _alertRepository.GetActiveAlertsAsync(cancellationToken);
         var alertsList = activeAlerts.ToList();
 
@@ -36,7 +39,6 @@ public class PriceMonitorService
 
         _logger.LogInformation("Encontrados {Count} alertas ativos", alertsList.Count);
 
-        // 2. Agrupar alertas por símbolo para otimizar chamadas à API
         var alertsBySymbol = alertsList.GroupBy(a => a.CryptoSymbol);
 
         foreach (var group in alertsBySymbol)
@@ -45,7 +47,6 @@ public class PriceMonitorService
 
             try
             {
-                // 3. Consultar preço atual
                 var currentPrice = await _priceService.GetCurrentPriceAsync(symbol, cancellationToken);
 
                 if (currentPrice is null)
@@ -56,7 +57,6 @@ public class PriceMonitorService
 
                 _logger.LogInformation("{Symbol}: ${Price:N2}", symbol, currentPrice.Value);
 
-                // 4. Verificar cada alerta desse símbolo
                 foreach (var alert in group)
                 {
                     if (alert.ShouldTrigger(currentPrice.Value))
@@ -70,11 +70,23 @@ public class PriceMonitorService
                             currentPrice.Value
                         );
 
-                        // 5. Marcar como disparado
+                        // Marcar como disparado
                         alert.MarkAsTriggered();
                         await _alertRepository.UpdateAsync(alert, cancellationToken);
 
-                        // TODO: Publicar mensagem no RabbitMQ (próxima etapa)
+                        // Publicar mensagem na fila
+                        var message = new AlertTriggeredMessage(
+                            alert.Id,
+                            alert.UserId,
+                            alert.User.Email,
+                            alert.CryptoSymbol,
+                            alert.TargetPrice,
+                            currentPrice.Value,
+                            alert.Condition.ToString(),
+                            DateTime.UtcNow
+                        );
+
+                        await _messagePublisher.PublishAlertTriggeredAsync(message, cancellationToken);
                     }
                 }
             }
