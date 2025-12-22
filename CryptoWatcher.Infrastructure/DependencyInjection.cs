@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using Polly.Extensions.Http;
+using StackExchange.Redis;
 
 namespace CryptoWatcher.Infrastructure;
 
@@ -29,8 +30,15 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAlertRepository, AlertRepository>();
 
+        // Redis
+        var redisConnection = configuration.GetConnectionString("Redis") ?? "localhost:6379";
+        services.AddSingleton<IConnectionMultiplexer>(
+            ConnectionMultiplexer.Connect(redisConnection)
+        );
+        services.AddSingleton<ICacheService, RedisCacheService>();
+
         // Configurar HttpClient para CoinGecko com Polly
-        services.AddHttpClient<IPriceService, CoinGeckoPriceService>(client =>
+        services.AddHttpClient<CoinGeckoPriceService>(client =>
         {
             client.BaseAddress = new Uri("https://api.coingecko.com/api/v3/");
             client.DefaultRequestHeaders.Add("User-Agent", "CryptoWatcher/1.0");
@@ -39,6 +47,9 @@ public static class DependencyInjection
         .AddPolicyHandler(GetRetryPolicy())
         .AddPolicyHandler(GetCircuitBreakerPolicy());
 
+        // Registrar PriceService com cache (Decorator Pattern)
+        services.AddScoped<IPriceService, CachedPriceService>();
+
         return services;
     }
 
@@ -46,8 +57,8 @@ public static class DependencyInjection
     private static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy()
     {
         return HttpPolicyExtensions
-            .HandleTransientHttpError() // 5xx, 408, network errors
-            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests) // 429
+            .HandleTransientHttpError()
+            .OrResult(msg => msg.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
             .WaitAndRetryAsync(
                 retryCount: 3,
                 sleepDurationProvider: retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
@@ -66,8 +77,8 @@ public static class DependencyInjection
         return HttpPolicyExtensions
             .HandleTransientHttpError()
             .CircuitBreakerAsync(
-                handledEventsAllowedBeforeBreaking: 5, // Abre após 5 falhas consecutivas
-                durationOfBreak: TimeSpan.FromSeconds(30), // Fica aberto por 30s
+                handledEventsAllowedBeforeBreaking: 5,
+                durationOfBreak: TimeSpan.FromSeconds(30),
                 onBreak: (outcome, duration) =>
                 {
                     Console.WriteLine($"🔴 Circuit Breaker ABERTO por {duration.TotalSeconds}s");
