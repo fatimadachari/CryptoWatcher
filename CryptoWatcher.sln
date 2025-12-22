@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Domain", "CryptoWatcher.Domain\CryptoWatcher.Domain.csproj", "{C4B09CA9-446B-4F76-B6AF-7F3243978F77}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Application", "CryptoWatcher.Application\CryptoWatcher.Application.csproj", "{6D2EEC53-90D3-4217-9DFA-CD961BAF8F0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Infrastructure", "CryptoWatcher.Infrastructure\CryptoWatcher.Infrastructure.csproj", "{845A0178-8745-44A0-A973-24BD6E9D57B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.API", "CryptoWatcher.API\CryptoWatcher.API.csproj", "{143D38D4-9B96-49B4-9783-A4879032D0F6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Worker", "CryptoWatcher.Worker\CryptoWatcher.Worker.csproj", "{868B53C0-49C4-413D-9EF1-ECC9265353E0}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C4B09CA9-446B-4F76-B6AF-7F3243978F77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4B09CA9-446B-4F76-B6AF-7F3243978F77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4B09CA9-446B-4F76-B6AF-7F3243978F77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4B09CA9-446B-4F76-B6AF-7F3243978F77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D2EEC53-90D3-4217-9DFA-CD961BAF8F0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D2EEC53-90D3-4217-9DFA-CD961BAF8F0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D2EEC53-90D3-4217-9DFA-CD961BAF8F0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D2EEC53-90D3-4217-9DFA-CD961BAF8F0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{845A0178-8745-44A0-A973-24BD6E9D57B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{845A0178-8745-44A0-A973-24BD6E9D57B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{845A0178-8745-44A0-A973-24BD6E9D57B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{845A0178-8745-44A0-A973-24BD6E9D57B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{143D38D4-9B96-49B4-9783-A4879032D0F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{143D38D4-9B96-49B4-9783-A4879032D0F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{143D38D4-9B96-49B4-9783-A4879032D0F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{143D38D4-9B96-49B4-9783-A4879032D0F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Worker">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>dotnet-CryptoWatcher.Worker-fb58d7a4-50eb-47df-8109-00b250399dc6</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CryptoWatcher.Infrastructure\CryptoWatcher.Infrastructure.csproj" />
+    <ProjectReference Include="..\CryptoWatcher.Application\CryptoWatcher.Application.csproj" />
+    <ProjectReference Include="..\CryptoWatcher.Domain\CryptoWatcher.Domain.csproj" />
+  </ItemGroup>
+</Project>
