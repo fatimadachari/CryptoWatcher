@@ -27,8 +27,13 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IAlertRepository, AlertRepository>();
 
-        // Serviços externos
-        services.AddHttpClient<IPriceService, CoinGeckoPriceService>();
+        // Configurar HttpClient para CoinGecko
+        services.AddHttpClient<IPriceService, CoinGeckoPriceService>(client =>
+        {
+            client.BaseAddress = new Uri("https://api.coingecko.com/api/v3/");
+            client.DefaultRequestHeaders.Add("User-Agent", "CryptoWatcher/1.0");
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
 
         return services;
     }

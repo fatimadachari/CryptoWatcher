@@ -1,4 +1,5 @@
 ﻿using CryptoWatcher.Application.Interfaces.Services;
+using Microsoft.Extensions.Logging;
 using System.Text.Json;
 
 namespace CryptoWatcher.Infrastructure.Services;
@@ -6,12 +7,12 @@ namespace CryptoWatcher.Infrastructure.Services;
 public class CoinGeckoPriceService : IPriceService
 {
     private readonly HttpClient _httpClient;
-    private const string BaseUrl = "https://api.coingecko.com/api/v3";
+    private readonly ILogger<CoinGeckoPriceService> _logger;
 
-    public CoinGeckoPriceService(HttpClient httpClient)
+    public CoinGeckoPriceService(HttpClient httpClient, ILogger<CoinGeckoPriceService> logger)
     {
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri(BaseUrl);
+        _logger = logger;
     }
 
     public async Task<decimal?> GetCurrentPriceAsync(
@@ -20,40 +21,46 @@ public class CoinGeckoPriceService : IPriceService
     {
         try
         {
-            // Mapear símbolo para ID do CoinGecko
             var coinId = MapSymbolToCoinId(cryptoSymbol);
+            var url = $"simple/price?ids={coinId}&vs_currencies=usd";
 
-            // Endpoint: /simple/price?ids=bitcoin&vs_currencies=usd
-            var response = await _httpClient.GetAsync(
-                $"/simple/price?ids={coinId}&vs_currencies=usd",
-                cancellationToken
-            );
+            _logger.LogInformation("Consultando preço de {Symbol} (ID: {CoinId})", cryptoSymbol, coinId);
+
+            var response = await _httpClient.GetAsync(url, cancellationToken);
 
             if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning(
+                    "Erro ao consultar {CoinId}: {StatusCode}",
+                    coinId,
+                    response.StatusCode
+                );
                 return null;
+            }
 
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             var jsonDoc = JsonDocument.Parse(content);
 
-            // Estrutura: { "bitcoin": { "usd": 50000 } }
             if (jsonDoc.RootElement.TryGetProperty(coinId, out var coinData))
             {
                 if (coinData.TryGetProperty("usd", out var priceElement))
                 {
-                    return priceElement.GetDecimal();
+                    var price = priceElement.GetDecimal();
+                    _logger.LogInformation("{Symbol}: ${Price:N2}", cryptoSymbol, price);
+                    return price;
                 }
             }
 
+            _logger.LogWarning("Preço não encontrado na resposta para {CoinId}", coinId);
             return null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Log aqui (faremos depois)
+            _logger.LogError(ex, "Erro ao consultar preço de {Symbol}", cryptoSymbol);
             return null;
         }
     }
 
-    // Mapear símbolos comuns para IDs do CoinGecko
     private static string MapSymbolToCoinId(string symbol)
     {
         return symbol.ToUpper() switch
@@ -68,7 +75,7 @@ public class CoinGeckoPriceService : IPriceService
             "DOGE" => "dogecoin",
             "AVAX" => "avalanche-2",
             "MATIC" => "matic-network",
-            _ => symbol.ToLower() // Fallback
+            _ => symbol.ToLower()
         };
     }
 }
