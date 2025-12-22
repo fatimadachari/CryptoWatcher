@@ -3,7 +3,6 @@ using CryptoWatcher.Application.Interfaces.Services;
 using CryptoWatcher.Infrastructure.Data;
 using CryptoWatcher.Infrastructure.Repositories;
 using CryptoWatcher.Infrastructure.Services;
-using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -51,26 +50,7 @@ public static class DependencyInjection
         // Registrar PriceService com cache (Decorator Pattern)
         services.AddScoped<IPriceService, CachedPriceService>();
 
-        // Registrar PriceService com cache (Decorator Pattern)
-        services.AddScoped<IPriceService, CachedPriceService>();
-
-        // RabbitMQ com MassTransit
-        services.AddMassTransit(config =>
-        {
-            config.UsingRabbitMq((context, cfg) =>
-            {
-                var rabbitMqHost = configuration.GetValue<string>("RabbitMq:Host") ?? "localhost";
-                var rabbitMqUser = configuration.GetValue<string>("RabbitMq:Username") ?? "admin";
-                var rabbitMqPass = configuration.GetValue<string>("RabbitMq:Password") ?? "admin123";
-
-                cfg.Host(rabbitMqHost, "/", h =>
-                {
-                    h.Username(rabbitMqUser);
-                    h.Password(rabbitMqPass);
-                });
-            });
-        });
-
+        // Registrar Publisher (será usado pelo MassTransit configurado externamente)
         services.AddScoped<IMessagePublisher, RabbitMqPublisher>();
 
         return services;
