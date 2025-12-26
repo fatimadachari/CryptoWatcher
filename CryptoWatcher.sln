@@ -13,6 +13,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.API", "Crypto
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Worker", "CryptoWatcher.Worker\CryptoWatcher.Worker.csproj", "{868B53C0-49C4-413D-9EF1-ECC9265353E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Domain.Tests", "CryptoWatcher.Domain.Tests\CryptoWatcher.Domain.Tests.csproj", "{58A13E31-E9F7-4AB6-9A5F-DA0D35F99AF4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Application.Tests", "CryptoWatcher.Application.Tests\CryptoWatcher.Application.Tests.csproj", "{9255ED70-8C0C-4C02-BE88-772C5202C3D3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.API.IntegrationTests", "CryptoWatcher.API.IntegrationTests\CryptoWatcher.API.IntegrationTests.csproj", "{F73C40E3-E83D-40DA-9478-2231B0FD541D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CryptoWatcher.Worker.Tests", "CryptoWatcher.Worker.Tests\CryptoWatcher.Worker.Tests.csproj", "{49412ED6-C098-4602-B5F7-63695CF86419}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +50,21 @@ Global
 		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{868B53C0-49C4-413D-9EF1-ECC9265353E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{58A13E31-E9F7-4AB6-9A5F-DA0D35F99AF4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{58A13E31-E9F7-4AB6-9A5F-DA0D35F99AF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{58A13E31-E9F7-4AB6-9A5F-DA0D35F99AF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{58A13E31-E9F7-4AB6-9A5F-DA0D35F99AF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9255ED70-8C0C-4C02-BE88-772C5202C3D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9255ED70-8C0C-4C02-BE88-772C5202C3D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9255ED70-8C0C-4C02-BE88-772C5202C3D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9255ED70-8C0C-4C02-BE88-772C5202C3D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F73C40E3-E83D-40DA-9478-2231B0FD541D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F73C40E3-E83D-40DA-9478-2231B0FD541D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F73C40E3-E83D-40DA-9478-2231B0FD541D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F73C40E3-E83D-40DA-9478-2231B0FD541D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49412ED6-C098-4602-B5F7-63695CF86419}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49412ED6-C098-4602-B5F7-63695CF86419}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49412ED6-C098-4602-B5F7-63695CF86419}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49412ED6-C098-4602-B5F7-63695CF86419}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

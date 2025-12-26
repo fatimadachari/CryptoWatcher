@@ -21,4 +21,8 @@
     <ProjectReference Include="..\CryptoWatcher.Domain\CryptoWatcher.Domain.csproj" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Compile Remove="Dockerfile" />
+		<None Remove="Dockerfile" />
+	</ItemGroup>
 </Project>
