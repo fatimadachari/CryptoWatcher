@@ -1,5 +1,5 @@
-﻿using CryptoWatcher.Application.DTOs.Responses;
-using CryptoWatcher.Application.Interfaces.Repositories;
+﻿using CryptoWatcher.Application.Interfaces.Repositories;
+using CryptoWatcher.Domain.Entities;
 
 namespace CryptoWatcher.Application.UseCases.Alerts;
 
@@ -12,20 +12,11 @@ public class GetActiveAlertsUseCase
         _alertRepository = alertRepository;
     }
 
-    public async Task<IEnumerable<AlertResponse>> ExecuteAsync(
-        CancellationToken cancellationToken = default)
+    // ⬅️ AGORA RECEBE USERID
+    public async Task<IEnumerable<CryptoAlert>> ExecuteAsync(int userId, CancellationToken cancellationToken = default)
     {
-        var alerts = await _alertRepository.GetActiveAlertsAsync(cancellationToken);
-
-        return alerts.Select(alert => new AlertResponse(
-            alert.Id,
-            alert.UserId,
-            alert.CryptoSymbol,
-            alert.TargetPrice,
-            alert.Condition,
-            alert.Status,
-            alert.CreatedAt,
-            alert.TriggeredAt
-        ));
+        // ⬅️ BUSCA APENAS OS ALERTAS DO USUÁRIO
+        var alerts = await _alertRepository.GetActiveAlertsByUserAsync(userId, cancellationToken);
+        return alerts;
     }
 }

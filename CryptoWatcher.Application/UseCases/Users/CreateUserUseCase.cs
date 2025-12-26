@@ -1,6 +1,4 @@
-﻿using CryptoWatcher.Application.DTOs.Requests;
-using CryptoWatcher.Application.DTOs.Responses;
-using CryptoWatcher.Application.Interfaces.Repositories;
+﻿using CryptoWatcher.Application.Interfaces.Repositories;
 using CryptoWatcher.Domain.Entities;
 
 namespace CryptoWatcher.Application.UseCases.Users;
@@ -14,27 +12,24 @@ public class CreateUserUseCase
         _userRepository = userRepository;
     }
 
-    public async Task<UserResponse> ExecuteAsync(
-        CreateUserRequest request,
-        CancellationToken cancellationToken = default)
+    public async Task<User> ExecuteAsync(string email, string name, CancellationToken cancellationToken = default)
     {
-        // Validar se email já existe
-        var existingUser = await _userRepository.GetByEmailAsync(request.Email, cancellationToken);
-        if (existingUser is not null)
-            throw new InvalidOperationException($"Usuário com email {request.Email} já existe");
+        // Verificar se email já existe
+        var existingUser = await _userRepository.GetByEmailAsync(email, cancellationToken);
+        if (existingUser != null)
+        {
+            throw new InvalidOperationException($"Email {email} já está cadastrado");
+        }
 
-        // Criar entidade (validações acontecem no construtor)
-        var user = new User(request.Email, request.Name);
+        // ⬅️ POR ENQUANTO: usar hash temporário (vamos mudar isso depois com o RegisterUseCase)
+        var tempPasswordHash = BCrypt.Net.BCrypt.HashPassword("temp123");
 
-        // Persistir
-        var createdUser = await _userRepository.CreateAsync(user, cancellationToken);
+        // Criar novo usuário
+        var user = new User(email, name, tempPasswordHash);
 
-        // Retornar DTO
-        return new UserResponse(
-            createdUser.Id,
-            createdUser.Email,
-            createdUser.Name,
-            createdUser.CreatedAt
-        );
+        // Salvar no banco
+        await _userRepository.CreateAsync(user, cancellationToken);
+
+        return user;
     }
 }

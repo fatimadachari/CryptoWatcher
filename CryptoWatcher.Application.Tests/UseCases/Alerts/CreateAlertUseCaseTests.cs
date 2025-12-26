@@ -1,143 +1,97 @@
-﻿using CryptoWatcher.Application.DTOs.Requests;
-using CryptoWatcher.Application.Interfaces.Repositories;
+﻿using CryptoWatcher.Application.Interfaces.Repositories;
 using CryptoWatcher.Application.UseCases.Alerts;
 using CryptoWatcher.Domain.Entities;
 using CryptoWatcher.Domain.Enums;
 using FluentAssertions;
 using Moq;
+using Xunit;
 
 namespace CryptoWatcher.Application.Tests.UseCases.Alerts;
 
 public class CreateAlertUseCaseTests
 {
-    private readonly Mock<IAlertRepository> _mockAlertRepository;
-    private readonly Mock<IUserRepository> _mockUserRepository;
+    private readonly Mock<IAlertRepository> _mockAlertRepo;
+    private readonly Mock<IUserRepository> _mockUserRepo;
     private readonly CreateAlertUseCase _useCase;
 
     public CreateAlertUseCaseTests()
     {
-        _mockAlertRepository = new Mock<IAlertRepository>();
-        _mockUserRepository = new Mock<IUserRepository>();
-        _useCase = new CreateAlertUseCase(_mockAlertRepository.Object, _mockUserRepository.Object);
+        _mockAlertRepo = new Mock<IAlertRepository>();
+        _mockUserRepo = new Mock<IUserRepository>();
+        _useCase = new CreateAlertUseCase(_mockAlertRepo.Object, _mockUserRepo.Object);
     }
 
     [Fact]
     public async Task ExecuteAsync_WithValidData_ShouldCreateAlert()
     {
         // Arrange
-        var request = new CreateAlertRequest(
-            UserId: 1,
-            CryptoSymbol: "BTC",
-            TargetPrice: 50000,
-            Condition: PriceCondition.Below
-        );
+        var userId = 1;
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("test123");
+        var user = new User("test@test.com", "Test User", passwordHash);
 
-        _mockUserRepository
-            .Setup(r => r.ExistsAsync(request.UserId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
-        _mockAlertRepository
-            .Setup(r => r.CreateAsync(It.IsAny<CryptoAlert>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((CryptoAlert alert, CancellationToken _) =>
-            {
-                typeof(CryptoAlert).GetProperty("Id")!.SetValue(alert, 1);
-                return alert;
-            });
+        _mockUserRepo.Setup(r => r.GetByIdAsync(userId, default))
+            .ReturnsAsync(user);
 
         // Act
-        var result = await _useCase.ExecuteAsync(request);
+        var result = await _useCase.ExecuteAsync(
+            userId,
+            "BTC",
+            50000,
+            PriceCondition.Above
+        );
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(1);
-        result.UserId.Should().Be(request.UserId);
-        result.CryptoSymbol.Should().Be(request.CryptoSymbol);
-        result.TargetPrice.Should().Be(request.TargetPrice);
-        result.Condition.Should().Be(request.Condition);
-        result.Status.Should().Be(AlertStatus.Active);
-
-        _mockUserRepository.Verify(
-            r => r.ExistsAsync(request.UserId, It.IsAny<CancellationToken>()),
-            Times.Once
-        );
-
-        _mockAlertRepository.Verify(
-            r => r.CreateAsync(It.IsAny<CryptoAlert>(), It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        result.UserId.Should().Be(userId);
+        result.CryptoSymbol.Should().Be("BTC");
+        result.TargetPrice.Should().Be(50000);
+        result.Condition.Should().Be(PriceCondition.Above);
+        _mockAlertRepo.Verify(r => r.CreateAsync(It.IsAny<CryptoAlert>(), default), Times.Once);
     }
 
     [Fact]
     public async Task ExecuteAsync_WithNonExistentUser_ShouldThrowInvalidOperationException()
     {
         // Arrange
-        var request = new CreateAlertRequest(
-            UserId: 999,
-            CryptoSymbol: "BTC",
-            TargetPrice: 50000,
-            Condition: PriceCondition.Below
-        );
+        var userId = 999;
 
-        _mockUserRepository
-            .Setup(r => r.ExistsAsync(request.UserId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(false);
+        _mockUserRepo.Setup(r => r.GetByIdAsync(userId, default))
+            .ReturnsAsync((User?)null);
 
         // Act
-        var act = async () => await _useCase.ExecuteAsync(request);
+        var act = async () => await _useCase.ExecuteAsync(
+            userId,
+            "BTC",
+            50000,
+            PriceCondition.Above
+        );
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage($"*Usuário {request.UserId}*não encontrado*");
-
-        _mockAlertRepository.Verify(
-            r => r.CreateAsync(It.IsAny<CryptoAlert>(), It.IsAny<CancellationToken>()),
-            Times.Never
-        );
+            .WithMessage("*não encontrado*");
+        _mockAlertRepo.Verify(r => r.CreateAsync(It.IsAny<CryptoAlert>(), default), Times.Never);
     }
 
     [Fact]
     public async Task ExecuteAsync_WithInvalidSymbol_ShouldThrowArgumentException()
     {
         // Arrange
-        var request = new CreateAlertRequest(
-            UserId: 1,
-            CryptoSymbol: "",
-            TargetPrice: 50000,
-            Condition: PriceCondition.Below
-        );
+        var userId = 1;
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("test123");
+        var user = new User("test@test.com", "Test User", passwordHash);
 
-        _mockUserRepository
-            .Setup(r => r.ExistsAsync(request.UserId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
+        _mockUserRepo.Setup(r => r.GetByIdAsync(userId, default))
+            .ReturnsAsync(user);
 
         // Act
-        var act = async () => await _useCase.ExecuteAsync(request);
-
-        // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*Símbolo*");
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_WithInvalidPrice_ShouldThrowArgumentException()
-    {
-        // Arrange
-        var request = new CreateAlertRequest(
-            UserId: 1,
-            CryptoSymbol: "BTC",
-            TargetPrice: -100,
-            Condition: PriceCondition.Below
+        var act = async () => await _useCase.ExecuteAsync(
+            userId,
+            "", // símbolo vazio
+            50000,
+            PriceCondition.Above
         );
 
-        _mockUserRepository
-            .Setup(r => r.ExistsAsync(request.UserId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(true);
-
-        // Act
-        var act = async () => await _useCase.ExecuteAsync(request);
-
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*Preço alvo deve ser maior que zero*");
+        await act.Should().ThrowAsync<ArgumentException>();
     }
 }

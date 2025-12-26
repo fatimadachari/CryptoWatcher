@@ -22,8 +22,8 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var response = await _createUserUseCase.ExecuteAsync(request, cancellationToken);
-            return CreatedAtAction(nameof(CreateUser), new { id = response.Id }, response);
+            var user = await _createUserUseCase.ExecuteAsync(request.Email, request.Name, cancellationToken);
+            return CreatedAtAction(nameof(CreateUser), new { id = user.Id }, user);
         }
         catch (InvalidOperationException ex)
         {

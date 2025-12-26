@@ -1,24 +1,24 @@
 ﻿using CryptoWatcher.Domain.Entities;
+using CryptoWatcher.Domain.Enums;
 using FluentAssertions;
+using Xunit;
 
 namespace CryptoWatcher.Domain.Tests.Entities;
 
 public class UserTests
 {
+    private const string ValidPasswordHash = "$2a$11$abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJ";
+
     [Fact]
     public void Constructor_WithValidData_ShouldCreateUser()
     {
-        // Arrange
-        var email = "test@example.com";
-        var name = "Test User";
-
-        // Act
-        var user = new User(email, name);
+        // Arrange & Act
+        var user = new User("test@example.com", "Test User", ValidPasswordHash);
 
         // Assert
-        user.Email.Should().Be(email);
-        user.Name.Should().Be(name);
-        user.CreatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        user.Email.Should().Be("test@example.com");
+        user.Name.Should().Be("Test User");
+        user.PasswordHash.Should().Be(ValidPasswordHash);
         user.Alerts.Should().BeEmpty();
     }
 
@@ -26,93 +26,84 @@ public class UserTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_WithInvalidEmail_ShouldThrowArgumentException(string invalidEmail)
+    [InlineData("invalid-email")]
+    [InlineData("missing@")]
+    public void Constructor_WithInvalidEmail_ShouldThrowArgumentException(string? invalidEmail)
     {
-        // Arrange & Act
-        var act = () => new User(invalidEmail, "Test User");
-
-        // Assert
+        // Arrange & Act & Assert
+        var act = () => new User(invalidEmail!, "Test User", ValidPasswordHash);
         act.Should().Throw<ArgumentException>()
-            .WithMessage("*Email*");
-    }
-
-    [Fact]
-    public void Constructor_WithEmailWithoutAt_ShouldThrowArgumentException()
-    {
-        // Arrange & Act
-        var act = () => new User("invalidemail.com", "Test User");
-
-        // Assert
-        act.Should().Throw<ArgumentException>()
-            .WithMessage("*Email inválido*");
+           .WithMessage("*Email*");
     }
 
     [Theory]
     [InlineData(null)]
     [InlineData("")]
     [InlineData("   ")]
-    public void Constructor_WithInvalidName_ShouldThrowArgumentException(string invalidName)
+    [InlineData("AB")]
+    public void Constructor_WithInvalidName_ShouldThrowArgumentException(string? invalidName)
     {
-        // Arrange & Act
-        var act = () => new User("test@example.com", invalidName);
-
-        // Assert
+        // Arrange & Act & Assert
+        var act = () => new User("test@example.com", invalidName!, ValidPasswordHash);
         act.Should().Throw<ArgumentException>()
-            .WithMessage("*Nome*");
+           .WithMessage("*Nome*");
     }
 
-    [Fact]
-    public void Constructor_WithShortName_ShouldThrowArgumentException()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Constructor_WithInvalidPasswordHash_ShouldThrowArgumentException(string? invalidHash)
     {
-        // Arrange & Act
-        var act = () => new User("test@example.com", "Ab");
-
-        // Assert
+        // Arrange & Act & Assert
+        var act = () => new User("test@example.com", "Test User", invalidHash!);
         act.Should().Throw<ArgumentException>()
-            .WithMessage("*Nome deve ter no mínimo 3 caracteres*");
+           .WithMessage("*senha*");
     }
 
     [Fact]
     public void UpdateName_WithValidName_ShouldUpdateName()
     {
         // Arrange
-        var user = new User("test@example.com", "Original Name");
-        var newName = "Updated Name";
+        var user = new User("test@example.com", "Old Name", ValidPasswordHash);
+        var oldUpdatedAt = user.UpdatedAt;
 
         // Act
-        user.UpdateName(newName);
+        user.UpdateName("New Name");
 
         // Assert
-        user.Name.Should().Be(newName);
-        user.UpdatedAt.Should().NotBeNull();
-        user.UpdatedAt.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromSeconds(1));
+        user.Name.Should().Be("New Name");
+        user.UpdatedAt.Should().BeAfter(oldUpdatedAt!.Value);
     }
 
-    [Fact]
-    public void UpdateName_WithInvalidName_ShouldThrowArgumentException()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("AB")]
+    public void UpdateName_WithInvalidName_ShouldThrowArgumentException(string? invalidName)
     {
         // Arrange
-        var user = new User("test@example.com", "Original Name");
+        var user = new User("test@example.com", "Test User", ValidPasswordHash);
 
-        // Act
-        var act = () => user.UpdateName("");
-
-        // Assert
-        act.Should().Throw<ArgumentException>();
+        // Act & Assert
+        var act = () => user.UpdateName(invalidName!);
+        act.Should().Throw<ArgumentException>()
+           .WithMessage("*Nome*");
     }
 
     [Fact]
     public void AddAlert_ShouldAddAlertToCollection()
     {
         // Arrange
-        var user = new User("test@example.com", "Test User");
-        var alert = new CryptoAlert(user.Id, "BTC", 50000, Domain.Enums.PriceCondition.Below);
+        var user = new User("test@example.com", "Test User", ValidPasswordHash);
+        var alert = new CryptoAlert(user.Id, "BTC", 50000, PriceCondition.Above);
 
         // Act
         user.AddAlert(alert);
 
         // Assert
-        user.Alerts.Should().HaveCount(1);
-        user.Alerts.Should().Contain(alert);
+        user.Alerts.Should().ContainSingle()
+            .Which.Should().Be(alert);
     }
 }

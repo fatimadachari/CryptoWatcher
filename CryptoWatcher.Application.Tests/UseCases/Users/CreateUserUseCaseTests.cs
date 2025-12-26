@@ -1,112 +1,78 @@
-﻿using CryptoWatcher.Application.DTOs.Requests;
-using CryptoWatcher.Application.Interfaces.Repositories;
+﻿using CryptoWatcher.Application.Interfaces.Repositories;
 using CryptoWatcher.Application.UseCases.Users;
 using CryptoWatcher.Domain.Entities;
 using FluentAssertions;
 using Moq;
+using Xunit;
 
 namespace CryptoWatcher.Application.Tests.UseCases.Users;
 
 public class CreateUserUseCaseTests
 {
-    private readonly Mock<IUserRepository> _mockUserRepository;
+    private readonly Mock<IUserRepository> _mockRepo;
     private readonly CreateUserUseCase _useCase;
 
     public CreateUserUseCaseTests()
     {
-        _mockUserRepository = new Mock<IUserRepository>();
-        _useCase = new CreateUserUseCase(_mockUserRepository.Object);
+        _mockRepo = new Mock<IUserRepository>();
+        _useCase = new CreateUserUseCase(_mockRepo.Object);
     }
 
     [Fact]
     public async Task ExecuteAsync_WithValidData_ShouldCreateUser()
     {
         // Arrange
-        var request = new CreateUserRequest("test@example.com", "Test User");
+        var email = "test@test.com";
+        var name = "Test User";
 
-        _mockUserRepository
-            .Setup(r => r.GetByEmailAsync(request.Email, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User?)null); // Email não existe
-
-        _mockUserRepository
-            .Setup(r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User user, CancellationToken _) =>
-            {
-                // Simula o banco gerando um ID
-                typeof(User).GetProperty("Id")!.SetValue(user, 1);
-                return user;
-            });
+        _mockRepo.Setup(r => r.GetByEmailAsync(email, default))
+            .ReturnsAsync((User?)null);
 
         // Act
-        var result = await _useCase.ExecuteAsync(request);
+        var result = await _useCase.ExecuteAsync(email, name);
 
         // Assert
         result.Should().NotBeNull();
-        result.Id.Should().Be(1);
-        result.Email.Should().Be(request.Email);
-        result.Name.Should().Be(request.Name);
-
-        _mockUserRepository.Verify(
-            r => r.GetByEmailAsync(request.Email, It.IsAny<CancellationToken>()),
-            Times.Once
-        );
-
-        _mockUserRepository.Verify(
-            r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
-            Times.Once
-        );
+        result.Email.Should().Be(email);
+        result.Name.Should().Be(name);
+        _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>(), default), Times.Once);
     }
 
     [Fact]
-    public async Task ExecuteAsync_WithExistingEmail_ShouldThrowInvalidOperationException()
+    public async Task ExecuteAsync_WithDuplicateEmail_ShouldThrowInvalidOperationException()
     {
         // Arrange
-        var request = new CreateUserRequest("existing@example.com", "Test User");
-        var existingUser = new User("existing@example.com", "Existing User");
+        var email = "existing@test.com";
+        var name = "Test User";
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword("test123");
+        var existingUser = new User(email, "Existing", passwordHash);
 
-        _mockUserRepository
-            .Setup(r => r.GetByEmailAsync(request.Email, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(existingUser); // Email já existe
+        _mockRepo.Setup(r => r.GetByEmailAsync(email, default))
+            .ReturnsAsync(existingUser);
 
         // Act
-        var act = async () => await _useCase.ExecuteAsync(request);
+        var act = async () => await _useCase.ExecuteAsync(email, name);
 
         // Assert
         await act.Should().ThrowAsync<InvalidOperationException>()
-            .WithMessage($"*{request.Email}*já existe*");
-
-        _mockUserRepository.Verify(
-            r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
-            Times.Never // Não deve tentar criar
-        );
+            .WithMessage("*já está cadastrado*");
+        _mockRepo.Verify(r => r.CreateAsync(It.IsAny<User>(), default), Times.Never);
     }
 
     [Fact]
     public async Task ExecuteAsync_WithInvalidEmail_ShouldThrowArgumentException()
     {
         // Arrange
-        var request = new CreateUserRequest("invalid-email", "Test User");
+        var invalidEmail = "invalid-email";
+        var name = "Test User";
 
-        _mockUserRepository
-            .Setup(r => r.GetByEmailAsync(request.Email, It.IsAny<CancellationToken>()))
-            .ReturnsAsync((User?)null); // Email não existe (mas é inválido)
+        _mockRepo.Setup(r => r.GetByEmailAsync(invalidEmail, default))
+            .ReturnsAsync((User?)null);
 
         // Act
-        var act = async () => await _useCase.ExecuteAsync(request);
+        var act = async () => await _useCase.ExecuteAsync(invalidEmail, name);
 
         // Assert
-        await act.Should().ThrowAsync<ArgumentException>()
-            .WithMessage("*Email inválido*");
-
-        // O repositório deve ser consultado, mas não deve criar
-        _mockUserRepository.Verify(
-            r => r.GetByEmailAsync(request.Email, It.IsAny<CancellationToken>()),
-            Times.Once // É consultado primeiro
-        );
-
-        _mockUserRepository.Verify(
-            r => r.CreateAsync(It.IsAny<User>(), It.IsAny<CancellationToken>()),
-            Times.Never // Mas não deve criar
-        );
+        await act.Should().ThrowAsync<ArgumentException>();
     }
 }

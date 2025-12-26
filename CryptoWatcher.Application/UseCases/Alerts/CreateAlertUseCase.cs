@@ -1,7 +1,6 @@
-﻿using CryptoWatcher.Application.DTOs.Requests;
-using CryptoWatcher.Application.DTOs.Responses;
-using CryptoWatcher.Application.Interfaces.Repositories;
+﻿using CryptoWatcher.Application.Interfaces.Repositories;
 using CryptoWatcher.Domain.Entities;
+using CryptoWatcher.Domain.Enums;
 
 namespace CryptoWatcher.Application.UseCases.Alerts;
 
@@ -18,36 +17,27 @@ public class CreateAlertUseCase
         _userRepository = userRepository;
     }
 
-    public async Task<AlertResponse> ExecuteAsync(
-        CreateAlertRequest request,
+    // ⬅️ AGORA RECEBE USERID COMO PARÂMETRO
+    public async Task<CryptoAlert> ExecuteAsync(
+        int userId,
+        string cryptoSymbol,
+        decimal targetPrice,
+        PriceCondition condition,
         CancellationToken cancellationToken = default)
     {
-        // Validar se usuário existe
-        var userExists = await _userRepository.ExistsAsync(request.UserId, cancellationToken);
-        if (!userExists)
-            throw new InvalidOperationException($"Usuário {request.UserId} não encontrado");
+        // Verificar se usuário existe
+        var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+        if (user == null)
+        {
+            throw new InvalidOperationException($"Usuário {userId} não encontrado");
+        }
 
-        // Criar entidade
-        var alert = new CryptoAlert(
-            request.UserId,
-            request.CryptoSymbol,
-            request.TargetPrice,
-            request.Condition
-        );
+        // Criar alerta
+        var alert = new CryptoAlert(userId, cryptoSymbol, targetPrice, condition);
 
-        // Persistir
-        var createdAlert = await _alertRepository.CreateAsync(alert, cancellationToken);
+        // Salvar no banco
+        await _alertRepository.CreateAsync(alert, cancellationToken);
 
-        // Retornar DTO
-        return new AlertResponse(
-            createdAlert.Id,
-            createdAlert.UserId,
-            createdAlert.CryptoSymbol,
-            createdAlert.TargetPrice,
-            createdAlert.Condition,
-            createdAlert.Status,
-            createdAlert.CreatedAt,
-            createdAlert.TriggeredAt
-        );
+        return alert;
     }
 }

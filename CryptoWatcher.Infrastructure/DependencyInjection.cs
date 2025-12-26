@@ -71,6 +71,8 @@ public static class DependencyInjection
 
         services.AddScoped<IEmailService, SendGridEmailService>();
 
+        // JWT - ADICIONE ESTA LINHA
+        services.AddScoped<IJwtService, JwtService>();
         return services;
     }
 
