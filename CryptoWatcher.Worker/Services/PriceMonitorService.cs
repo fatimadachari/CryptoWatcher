@@ -88,6 +88,13 @@ public class PriceMonitorService
 
                         await _messagePublisher.PublishAlertTriggeredAsync(message, cancellationToken);
                     }
+                    else
+                    {
+                        _logger.LogWarning(
+        "?? Alerta NÃO disparou - Alert {AlertId}: {Symbol}, Status={Status}, Condition={Condition}, Target=${Target}, Current=${Current}",
+        alert.Id, alert.CryptoSymbol, alert.Status, alert.Condition, alert.TargetPrice, currentPrice
+    );
+                    }
                 }
             }
             catch (Exception ex)

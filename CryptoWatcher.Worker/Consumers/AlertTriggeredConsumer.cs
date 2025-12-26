@@ -1,14 +1,20 @@
 ﻿using CryptoWatcher.Application.DTOs.Messages;
+using CryptoWatcher.Application.Interfaces.Services;
 using MassTransit;
+using Microsoft.Extensions.Logging;
 
 namespace CryptoWatcher.Worker.Consumers;
 
 public class AlertTriggeredConsumer : IConsumer<AlertTriggeredMessage>
 {
+    private readonly IEmailService _emailService;
     private readonly ILogger<AlertTriggeredConsumer> _logger;
 
-    public AlertTriggeredConsumer(ILogger<AlertTriggeredConsumer> logger)
+    public AlertTriggeredConsumer(
+        IEmailService emailService,
+        ILogger<AlertTriggeredConsumer> logger)
     {
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -17,17 +23,26 @@ public class AlertTriggeredConsumer : IConsumer<AlertTriggeredMessage>
         var message = context.Message;
 
         _logger.LogInformation(
-            "📩 Mensagem recebida da fila: Alert {AlertId}",
-            message.AlertId
+            "📩 Mensagem recebida da fila: Alert {AlertId} - {Symbol} ${Price}",
+            message.AlertId, message.CryptoSymbol, message.CurrentPrice
         );
 
         try
         {
-            // Simular processamento (envio de notificação)
-            await SendNotificationAsync(message);
+            _logger.LogInformation("🔔 Enviando notificação por email...");
+
+            await _emailService.SendAlertNotificationAsync(
+                toEmail: message.UserEmail,
+                userName: message.UserEmail.Split('@')[0], // Nome temporário do email
+                cryptoSymbol: message.CryptoSymbol,
+                targetPrice: message.TargetPrice,
+                currentPrice: message.CurrentPrice,
+                condition: message.Condition.ToString(),
+                cancellationToken: context.CancellationToken
+            );
 
             _logger.LogInformation(
-                "✅ Notificação enviada com sucesso para {Email}",
+                "✅ Email enviado com sucesso para {Email}",
                 message.UserEmail
             );
         }
@@ -35,48 +50,11 @@ public class AlertTriggeredConsumer : IConsumer<AlertTriggeredMessage>
         {
             _logger.LogError(
                 ex,
-                "❌ Erro ao processar alerta {AlertId}",
-                message.AlertId
+                "❌ Erro ao processar alerta {AlertId} para {Email}",
+                message.AlertId,
+                message.UserEmail
             );
-
-            // Se lançar exceção, MassTransit faz NACK e reprocessa
-            throw;
+            throw; // Retry automático via MassTransit
         }
-    }
-
-    private async Task SendNotificationAsync(AlertTriggeredMessage message)
-    {
-        // Simular delay de envio de email/SMS
-        await Task.Delay(500);
-
-        _logger.LogWarning(
-            """
-            
-            ═══════════════════════════════════════════════════════
-            🔔 NOTIFICAÇÃO DE ALERTA
-            ═══════════════════════════════════════════════════════
-            Para: {Email}
-            Assunto: Alerta de {Symbol} Disparado!
-            
-            Olá,
-            
-            Seu alerta foi disparado:
-            • Criptomoeda: {Symbol}
-            • Condição: {Condition}
-            • Preço Alvo: ${Target:N2}
-            • Preço Atual: ${Current:N2}
-            • Data: {Date}
-            
-            Acesse o sistema para mais detalhes.
-            ═══════════════════════════════════════════════════════
-            """,
-            message.UserEmail,
-            message.CryptoSymbol,
-            message.CryptoSymbol,
-            message.Condition,
-            message.TargetPrice,
-            message.CurrentPrice,
-            message.TriggeredAt
-        );
     }
 }

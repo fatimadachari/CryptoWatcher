@@ -1,4 +1,6 @@
+using CryptoWatcher.Application.Interfaces.Services;
 using CryptoWatcher.Infrastructure;
+using CryptoWatcher.Infrastructure.Services;
 using CryptoWatcher.Worker.Consumers;
 using CryptoWatcher.Worker.Services;
 using CryptoWatcher.Worker.Workers;
@@ -11,6 +13,9 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 // Registrar o serviço de monitoramento
 builder.Services.AddScoped<PriceMonitorService>();
+
+// Registrar RabbitMqPublisher (apenas no Worker)
+builder.Services.AddScoped<IMessagePublisher, RabbitMqPublisher>();
 
 // Configurar MassTransit com Consumer
 builder.Services.AddMassTransit(config =>

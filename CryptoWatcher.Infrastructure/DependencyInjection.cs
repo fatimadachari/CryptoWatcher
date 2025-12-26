@@ -29,7 +29,6 @@ public static class DependencyInjection
         // Serviços (sem Redis, RabbitMQ, etc. para testes simples)
         services.AddSingleton<IPriceService, CoinGeckoPriceService>();
         services.AddSingleton<ICacheService, RedisCacheService>(); // Mock ou stub
-        services.AddSingleton<IMessagePublisher, RabbitMqPublisher>(); // Mock ou stub
 
         return services;
     }
@@ -70,8 +69,7 @@ public static class DependencyInjection
         // Registrar PriceService com cache (Decorator Pattern)
         services.AddScoped<IPriceService, CachedPriceService>();
 
-        // Registrar Publisher (será usado pelo MassTransit configurado externamente)
-        services.AddScoped<IMessagePublisher, RabbitMqPublisher>();
+        services.AddScoped<IEmailService, SendGridEmailService>();
 
         return services;
     }
