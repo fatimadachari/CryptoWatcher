@@ -166,7 +166,7 @@ public class SendGridEmailService : IEmailService
                     <tr>
                         <td style='background-color: #f9fafb; padding: 20px; text-align: center; border-radius: 0 0 8px 8px;'>
                             <p style='font-size: 12px; color: #9ca3af; margin: 0;'>
-                                © 2024 CryptoWatcher. Todos os direitos reservados.
+                                © 2025 CryptoWatcher. Todos os direitos reservados.
                             </p>
                         </td>
                     </tr>
