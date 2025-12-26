@@ -14,6 +14,26 @@ namespace CryptoWatcher.Infrastructure;
 
 public static class DependencyInjection
 {
+    public static IServiceCollection AddInfrastructureWithInMemoryDb(
+    this IServiceCollection services,
+    string databaseName = "TestDb")
+    {
+        // DbContext com InMemory
+        services.AddDbContext<AppDbContext>(options =>
+            options.UseInMemoryDatabase(databaseName));
+
+        // Repositórios
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IAlertRepository, AlertRepository>();
+
+        // Serviços (sem Redis, RabbitMQ, etc. para testes simples)
+        services.AddSingleton<IPriceService, CoinGeckoPriceService>();
+        services.AddSingleton<ICacheService, RedisCacheService>(); // Mock ou stub
+        services.AddSingleton<IMessagePublisher, RabbitMqPublisher>(); // Mock ou stub
+
+        return services;
+    }
+
     public static IServiceCollection AddInfrastructure(
         this IServiceCollection services,
         IConfiguration configuration)
