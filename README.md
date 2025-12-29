@@ -37,33 +37,33 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 ### Clean Architecture
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    Presentation                      │
+│                    Presentation                     │
 │         (API Controllers, Worker, React)            │
 ├─────────────────────────────────────────────────────┤
-│                    Application                       │
+│                    Application                      │
 │          (Use Cases, DTOs, Interfaces)              │
 ├─────────────────────────────────────────────────────┤
-│                   Infrastructure                     │
-│ (EF Core, Redis, RabbitMQ, SendGrid, External APIs)│
+│                   Infrastructure                    │
+│ (EF Core, Redis, RabbitMQ, SendGrid, External APIs) │
 ├─────────────────────────────────────────────────────┤
-│                      Domain                          │
-│           (Entities, Business Rules)                 │
+│                      Domain                         │
+│           (Entities, Business Rules)                │
 └─────────────────────────────────────────────────────┘
 ```
 
 ### Fluxo de Dados
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│   React  │───▶│   API    │───▶│ Database │    │ CoinGecko│
+│   React  │──▶│   API     │──▶│ Database │──▶│ CoinGecko│
 │Dashboard │    │  (JWT)   │    │ (SQL)    │    │   API    │
-└──────────┘    └──────────┘    └──────────┘    └────┬─────┘
+└──────────┘    └──────────┘    └──────────┘    └─────┬────┘
                                                       │
-┌──────────────────────────────────────────────────────┼─────┐
-│                    Worker Service                    │     │
-│  ┌────────────┐    ┌─────────┐    ┌──────────────┐ │     │
-│  │  Monitor   │───▶│  Redis  │───▶│   RabbitMQ   │◀┘     │
-│  │  Prices    │    │ (Cache) │    │   (Queue)    │       │
-│  └────────────┘    └─────────┘    └──────┬───────┘       │
+┌─────────────────────────────────────────────────────┼─────┐
+│                    Worker Service                   │     │
+│  ┌────────────┐    ┌─────────┐    ┌──────────────┐  │     │
+│  │  Monitor   │──▶│  Redis   │──▶│   RabbitMQ   │◀┘     │
+│  │  Prices    │    │ (Cache) │    │   (Queue)    │        │
+│  └────────────┘    └─────────┘    └───────┬──────┘        │
 │                                           │               │
 │                    ┌──────────────────────▼────┐          │
 │                    │  Email Consumer           │          │
