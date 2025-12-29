@@ -1,8 +1,9 @@
 # 🚀 CryptoWatcher
 
-Sistema de monitoramento de preços de criptomoedas com notificações em tempo real, desenvolvido com arquitetura limpa e práticas enterprise-grade.
+Sistema enterprise de monitoramento de preços de criptomoedas com notificações em tempo real, desenvolvido com arquitetura limpa e práticas enterprise-grade.
 
 ![.NET](https://img.shields.io/badge/.NET-9.0-512BD4?style=flat&logo=dotnet)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=flat&logo=react)
 ![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker)
 ![RabbitMQ](https://img.shields.io/badge/RabbitMQ-Messaging-FF6600?style=flat&logo=rabbitmq)
 ![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=flat&logo=redis)
@@ -13,12 +14,23 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 
 ### ✨ Funcionalidades
 
+#### Backend
 - **Alertas Personalizados**: Configure alertas para serem disparados quando o preço estiver acima ou abaixo de um valor específico
 - **Monitoramento Contínuo**: Worker service que verifica preços a cada minuto
-- **Notificações Assíncronas**: Sistema de filas com RabbitMQ para processamento desacoplado
+- **Notificações por Email**: Templates HTML profissionais enviados via SendGrid
+- **Autenticação JWT**: Sistema completo de registro, login e autorização
 - **Cache Inteligente**: Redis para reduzir chamadas à API externa e melhorar performance
-- **Resiliência**: Retry policies e circuit breakers para maior confiabilidade
+- **Resiliência**: Retry policies e circuit breakers com Polly para maior confiabilidade
 - **API REST**: Interface completa com documentação Swagger
+- **Testes Automatizados**: 47+ testes (Unit, Integration)
+
+#### Frontend
+- **Dashboard Moderno**: Interface React com tema dark profissional
+- **Gráficos em Tempo Real**: Visualização de preços com Recharts
+- **Top 10 Criptomoedas**: Market cap, volume, variação 24h
+- **Sistema de Login**: Autenticação completa com JWT
+- **CRUD de Alertas**: Criar, visualizar e gerenciar seus alertas
+- **Responsivo**: Design adaptável para mobile e desktop
 
 ## 🏗️ Arquitetura
 
@@ -26,13 +38,13 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 ```
 ┌─────────────────────────────────────────────────────┐
 │                    Presentation                      │
-│              (API Controllers, Worker)               │
+│         (API Controllers, Worker, React)            │
 ├─────────────────────────────────────────────────────┤
 │                    Application                       │
 │          (Use Cases, DTOs, Interfaces)              │
 ├─────────────────────────────────────────────────────┤
 │                   Infrastructure                     │
-│    (EF Core, Redis, RabbitMQ, External APIs)        │
+│ (EF Core, Redis, RabbitMQ, SendGrid, External APIs)│
 ├─────────────────────────────────────────────────────┤
 │                      Domain                          │
 │           (Entities, Business Rules)                 │
@@ -42,8 +54,8 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 ### Fluxo de Dados
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│   User   │───▶│   API    │───▶│ Database │    │ CoinGecko│
-│          │    │          │    │ (SQL)    │    │   API    │
+│   React  │───▶│   API    │───▶│ Database │    │ CoinGecko│
+│Dashboard │    │  (JWT)   │    │ (SQL)    │    │   API    │
 └──────────┘    └──────────┘    └──────────┘    └────┬─────┘
                                                       │
 ┌──────────────────────────────────────────────────────┼─────┐
@@ -54,8 +66,8 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 │  └────────────┘    └─────────┘    └──────┬───────┘       │
 │                                           │               │
 │                    ┌──────────────────────▼────┐          │
-│                    │  Notification Consumer    │          │
-│                    │   (Email/SMS/Webhook)     │          │
+│                    │  Email Consumer           │          │
+│                    │  (SendGrid Templates)     │          │
 │                    └───────────────────────────┘          │
 └───────────────────────────────────────────────────────────┘
 ```
@@ -65,20 +77,33 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 ### Backend
 - **.NET 9.0** - Framework principal
 - **Entity Framework Core 9.0** - ORM para acesso a dados
-- **ASP.NET Core** - Web API
+- **ASP.NET Core Identity** - Sistema de autenticação
+- **JWT Bearer** - Tokens de autenticação
 - **Worker Services** - Background tasks
+
+### Frontend
+- **React 18** - Biblioteca UI
+- **Vite** - Build tool moderno
+- **Tailwind CSS 3** - Framework CSS
+- **Recharts** - Biblioteca de gráficos
+- **React Router DOM** - Navegação
+- **Axios** - Cliente HTTP
+- **Lucide React** - Ícones
 
 ### Infraestrutura
 - **SQL Server 2022** - Banco de dados relacional
 - **Redis 7** - Cache em memória
 - **RabbitMQ 3** - Message broker
+- **SendGrid** - Serviço de email
 - **Docker & Docker Compose** - Containerização
 
 ### Bibliotecas
 - **MassTransit 8.x** - Abstração para mensageria
 - **Polly** - Resiliência (retry, circuit breaker)
+- **BCrypt.Net** - Hash de senhas
 - **StackExchange.Redis** - Cliente Redis
 - **Swashbuckle (Swagger)** - Documentação da API
+- **xUnit + FluentAssertions + Moq** - Testes
 
 ### Padrões e Práticas
 - Clean Architecture
@@ -87,87 +112,128 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 - Decorator Pattern (Cached Services)
 - Domain-Driven Design (DDD)
 - Dependency Injection
+- JWT Authentication
+- CORS Configuration
 
 ## 🚀 Como Executar
 
 ### Pré-requisitos
 - [Docker](https://www.docker.com/get-started) e Docker Compose
-- (Opcional) [.NET 9 SDK](https://dotnet.microsoft.com/download) para desenvolvimento local
+- [.NET 9 SDK](https://dotnet.microsoft.com/download)
+- [Node.js 18+](https://nodejs.org/)
+- Conta SendGrid (para emails reais)
 
-### Executar com Docker (Recomendado)
+### Executar com Docker + Frontend Local
 
 1. **Clone o repositório**
 ```bash
-git clone https://github.com/seu-usuario/CryptoWatcher.git
+git clone https://github.com/fatimadachari/CryptoWatcher.git
 cd CryptoWatcher
 ```
 
-2. **Suba toda a infraestrutura**
+2. **Suba a infraestrutura**
 ```bash
 docker-compose up -d
 ```
 
-3. **Aguarde os serviços iniciarem** (30-60 segundos)
-```bash
-docker-compose logs -f api worker
+3. **Configure o SendGrid**
+
+Edite `CryptoWatcher.API/appsettings.Development.json`:
+```json
+{
+  "SendGrid": {
+    "ApiKey": "SUA_API_KEY_SENDGRID",
+    "FromEmail": "seu@email.com",
+    "FromName": "CryptoWatcher"
+  },
+  "Jwt": {
+    "SecretKey": "SuperSecretKeyComMaisde32CaracteresParaSegurancaMaxima!",
+    "Issuer": "CryptoWatcher",
+    "Audience": "CryptoWatcherAPI",
+    "ExpirationMinutes": "1440"
+  }
+}
 ```
 
-4. **Acesse a API**
-- Swagger UI: http://localhost:5000/swagger
-- RabbitMQ Management: http://localhost:15672 (admin/admin123)
-
-### Executar Localmente (Desenvolvimento)
-
-1. **Suba apenas a infraestrutura**
+4. **Execute as migrations**
 ```bash
-docker-compose up -d sqlserver redis rabbitmq
-```
-
-2. **Configure as connection strings**
-```bash
-# Em appsettings.Development.json
-# Já configurado para localhost
-```
-
-3. **Execute as migrations**
-```bash
-dotnet ef database update --project CryptoWatcher.Infrastructure --startup-project CryptoWatcher.API
-```
-
-4. **Rode a API e o Worker**
-```bash
-# Terminal 1
 cd CryptoWatcher.API
-dotnet run
+dotnet ef database update --project ../CryptoWatcher.Infrastructure
+```
 
-# Terminal 2
+5. **Rode a API**
+```bash
+dotnet run
+# API rodando em: http://localhost:5065
+```
+
+6. **Rode o Worker** (outro terminal)
+```bash
 cd CryptoWatcher.Worker
 dotnet run
 ```
 
+7. **Rode o Frontend** (outro terminal)
+```bash
+cd CryptoWatcher.Web
+npm install
+npm run dev
+# Frontend rodando em: http://localhost:5173
+```
+
+8. **Acesse a aplicação**
+- Frontend: http://localhost:5173
+- Swagger API: http://localhost:5065/swagger
+- RabbitMQ Management: http://localhost:15672 (admin/admin123)
+
 ## 📚 Uso da API
 
-### Criar um Usuário
+### Autenticação
+
+#### Registrar Novo Usuário
 ```bash
-POST /api/users
+POST /api/auth/register
 Content-Type: application/json
 
 {
   "email": "user@example.com",
+  "password": "senha123",
   "name": "João Silva"
 }
+
+# Response: { userId, email, name, token }
 ```
 
-### Criar um Alerta
+#### Login
 ```bash
-POST /api/alerts
+POST /api/auth/login
 Content-Type: application/json
 
 {
-  "userId": 1,
+  "email": "user@example.com",
+  "password": "senha123"
+}
+
+# Response: { userId, email, name, token }
+```
+
+### Alertas (Requer Autenticação)
+
+Adicione o token JWT no header:
+```
+Authorization: Bearer {seu-token-jwt}
+```
+
+#### Criar um Alerta
+```bash
+POST /api/alerts
+Content-Type: application/json
+Authorization: Bearer {token}
+
+{
   "cryptoSymbol": "BTC",
   "targetPrice": 50000,
-  "condition": 2
+  "condition": 1
 }
 ```
 
@@ -175,9 +241,12 @@ Content-Type: application/json
 - `1` = Above (acima do preço alvo)
 - `2` = Below (abaixo do preço alvo)
 
-### Listar Alertas Ativos
+#### Listar Alertas Ativos
 ```bash
 GET /api/alerts/active
+Authorization: Bearer {token}
+
+# Retorna apenas os alertas do usuário logado
 ```
 
 ## 📁 Estrutura do Projeto
@@ -191,40 +260,100 @@ CryptoWatcher/
 │   ├── DTOs/
 │   ├── Interfaces/
 │   └── UseCases/
+│       ├── Alerts/
+│       ├── Auth/                      # NEW: JWT Authentication
+│       └── Users/
 ├── CryptoWatcher.Infrastructure/      # Implementações técnicas
-│   ├── Data/                          # DbContext e Configurations
+│   ├── Data/
 │   ├── Repositories/
 │   └── Services/
+│       ├── JwtService.cs              # NEW: Geração de tokens
+│       └── SendGridEmailService.cs    # NEW: Envio de emails
 ├── CryptoWatcher.API/                 # API REST
 │   ├── Controllers/
+│   │   ├── AlertsController.cs        # Protected endpoints
+│   │   └── AuthController.cs          # NEW: Login/Register
 │   └── Dockerfile
 ├── CryptoWatcher.Worker/              # Background Service
-│   ├── Workers/
 │   ├── Services/
 │   ├── Consumers/
+│   │   └── AlertTriggeredConsumer.cs  # Email sender
 │   └── Dockerfile
-└── docker-compose.yml                 # Orquestração de containers
+├── CryptoWatcher.Web/                 # NEW: React Frontend
+│   ├── src/
+│   │   ├── components/
+│   │   │   ├── LivePrices.jsx         # Gráficos tempo real
+│   │   │   └── ProtectedRoute.jsx
+│   │   ├── contexts/
+│   │   │   └── AuthContext.jsx
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── Register.jsx
+│   │   │   └── Dashboard.jsx
+│   │   └── services/
+│   │       ├── api.js
+│   │       └── priceService.js
+│   ├── package.json
+│   └── vite.config.js
+├── CryptoWatcher.Domain.Tests/        # Testes de Domínio (32 testes)
+├── CryptoWatcher.Application.Tests/   # Testes de Application (7 testes)
+├── CryptoWatcher.API.IntegrationTests/# Testes de Integração (8 testes)
+└── docker-compose.yml
 ```
 
 ## 🧪 Testes
 ```bash
-# Executar testes (quando implementados)
+# Executar todos os testes
 dotnet test
+
+# Ver cobertura detalhada
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=opencover
+
+# Status atual: 47 testes passando ✅
 ```
+
+**Cobertura de Testes:**
+- ✅ 32 testes de Domain (Entities, ValueObjects)
+- ✅ 7 testes de Application (Use Cases)
+- ✅ 8 testes de Integration (Controllers, API)
 
 ## 🔒 Segurança
 
-- Senhas e connection strings sensíveis devem ser gerenciadas via **User Secrets** (desenvolvimento) ou **Environment Variables** (produção)
-- O `appsettings.Development.json` está no `.gitignore`
-- Em produção, use **Azure Key Vault** ou similar
+- ✅ **Senhas**: Hash com BCrypt (salted + work factor 11)
+- ✅ **JWT**: Tokens assinados com HMAC-SHA256
+- ✅ **CORS**: Configurado para permitir apenas origens autorizadas
+- ✅ **Authorization**: Endpoints protegidos com `[Authorize]`
+- ✅ **User Secrets**: Para desenvolvimento local
+- ✅ **Environment Variables**: Para produção
+
+⚠️ **IMPORTANTE**: Nunca commite API keys ou secrets no repositório!
+```bash
+# Use User Secrets localmente
+dotnet user-secrets set "SendGrid:ApiKey" "sua-key-aqui"
+dotnet user-secrets set "Jwt:SecretKey" "sua-secret-aqui"
+```
 
 ## 📈 Roadmap
 
-- [ ] Implementar envio real de emails (SendGrid/SMTP)
-- [ ] Adicionar autenticação JWT
-- [ ] Dashboard web com React/Blazor
-- [ ] Testes unitários e de integração
+### ✅ Concluído
+- [x] Clean Architecture com .NET 9
+- [x] Monitoramento de preços (CoinGecko API)
+- [x] Sistema de alertas com RabbitMQ
+- [x] Cache Redis
+- [x] Resiliência com Polly
+- [x] Envio real de emails (SendGrid)
+- [x] Autenticação JWT
+- [x] Dashboard web com React
+- [x] Gráficos em tempo real
+- [x] Testes unitários e de integração
+- [x] Docker Compose
+
+### 🔜 Próximos Passos
 - [ ] CI/CD com GitHub Actions
-- [ ] Deploy em Azure/AWS
+- [ ] Deploy em produção (Render.com + Vercel)
+- [ ] Websockets para notificações real-time
+- [ ] Histórico de alertas disparados
+- [ ] Dashboard de estatísticas de usuário
 - [ ] Suporte a múltiplas exchanges
 - [ ] Webhooks customizáveis
+- [ ] Testes E2E com Playwright
