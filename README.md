@@ -26,6 +26,10 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 ![Dashboard](docs/screenshots/dashboard.png)
 *Dashboard integrado com gráficos em tempo real, top 10 criptomoedas e sistema de alertas personalizados*
 
+### Notificação por Email
+![Email](docs/screenshots/email.png)
+*Template HTML responsivo com tema neon verde, enviado via SendGrid quando alertas são disparados*
+
 ## ✨ Funcionalidades
 
 ### Backend
