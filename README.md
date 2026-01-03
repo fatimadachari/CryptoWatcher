@@ -12,9 +12,23 @@ Sistema enterprise de monitoramento de preços de criptomoedas com notificaçõe
 
 CryptoWatcher permite que usuários criem alertas personalizados para serem notificados quando o preço de uma criptomoeda atinge um valor específico. O sistema monitora preços em tempo real através da API do CoinGecko e processa notificações de forma assíncrona usando filas de mensagens.
 
-### ✨ Funcionalidades
+## 📸 Screenshots
 
-#### Backend
+### Tela de Login
+![Login](docs/screenshots/login.png)
+*Autenticação JWT com interface moderna e tema neon verde*
+
+### Tela de Registro
+![Register](docs/screenshots/register.png)
+*Sistema de cadastro com validação e feedback visual em tempo real*
+
+### Dashboard Completo
+![Dashboard](docs/screenshots/dashboard.png)
+*Dashboard integrado com gráficos em tempo real, top 10 criptomoedas e sistema de alertas personalizados*
+
+## ✨ Funcionalidades
+
+### Backend
 - **Alertas Personalizados**: Configure alertas para serem disparados quando o preço estiver acima ou abaixo de um valor específico
 - **Monitoramento Contínuo**: Worker service que verifica preços a cada minuto
 - **Notificações por Email**: Templates HTML profissionais enviados via SendGrid
@@ -24,7 +38,7 @@ CryptoWatcher permite que usuários criem alertas personalizados para serem noti
 - **API REST**: Interface completa com documentação Swagger
 - **Testes Automatizados**: 47+ testes (Unit, Integration)
 
-#### Frontend
+### Frontend
 - **Dashboard Moderno**: Interface React com tema dark profissional
 - **Gráficos em Tempo Real**: Visualização de preços com Recharts
 - **Top 10 Criptomoedas**: Market cap, volume, variação 24h
