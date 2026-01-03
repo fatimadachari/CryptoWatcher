@@ -136,8 +136,8 @@ export default function Dashboard() {
           <button
             onClick={() => setShowCreateForm(!showCreateForm)}
             className={`flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all hover:scale-105 ${showCreateForm
-                ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'
-                : 'bg-gradient-to-r from-[#00ff88] to-[#00cc6a] text-black shadow-lg shadow-[#00ff88]/30 animate-glow border border-[#00ff88]/40'
+              ? 'bg-red-500/10 text-red-400 border border-red-500/30 hover:bg-red-500/20'
+              : 'bg-gradient-to-r from-[#00ff88] to-[#00cc6a] text-black shadow-lg shadow-[#00ff88]/30 animate-glow border border-[#00ff88]/40'
               }`}
           >
             {showCreateForm ? (
@@ -171,27 +171,48 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-gray-300 font-semibold mb-2 text-sm">Criptomoeda</label>
-                  <input
-                    type="text"
+                  <select
                     value={cryptoSymbol}
                     onChange={(e) => setCryptoSymbol(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0a0e0d] border border-gray-700 rounded-xl focus:ring-2 focus:ring-[#00ff88] focus:border-[#00ff88] text-white placeholder:text-gray-600 transition-all"
-                    placeholder="BTC, ETH, SOL..."
+                    className="w-full px-4 py-3 bg-[#0a0e0d] border border-gray-700 rounded-xl focus:ring-2 focus:ring-[#00ff88] focus:border-[#00ff88] text-white transition-all appearance-none cursor-pointer"
                     required
-                  />
+                  >
+                    <option value="">Selecione a moeda</option>
+                    <option value="BTC">₿ Bitcoin (BTC)</option>
+                    <option value="ETH">Ξ Ethereum (ETH)</option>
+                    <option value="BNB">🔶 Binance Coin (BNB)</option>
+                    <option value="SOL">◎ Solana (SOL)</option>
+                    <option value="XRP">✕ Ripple (XRP)</option>
+                    <option value="ADA">₳ Cardano (ADA)</option>
+                    <option value="DOGE">Ð Dogecoin (DOGE)</option>
+                    <option value="MATIC">⬡ Polygon (MATIC)</option>
+                    <option value="DOT">● Polkadot (DOT)</option>
+                    <option value="AVAX">▲ Avalanche (AVAX)</option>
+                    <option value="LINK">⬡ Chainlink (LINK)</option>
+                    <option value="UNI">🦄 Uniswap (UNI)</option>
+                  </select>
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 font-semibold mb-2 text-sm">Preço Alvo</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    value={targetPrice}
-                    onChange={(e) => setTargetPrice(e.target.value)}
-                    className="w-full px-4 py-3 bg-[#0a0e0d] border border-gray-700 rounded-xl focus:ring-2 focus:ring-[#00ff88] focus:border-[#00ff88] text-white placeholder:text-gray-600 transition-all"
-                    placeholder="50000.00"
-                    required
-                  />
+                  <label className="block text-gray-300 font-semibold mb-2 text-sm">Preço Alvo (USD)</label>
+                  <div className="relative">
+                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-semibold text-lg">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={targetPrice}
+                      onChange={(e) => setTargetPrice(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-[#0a0e0d] border border-gray-700 rounded-xl focus:ring-2 focus:ring-[#00ff88] focus:border-[#00ff88] text-white placeholder:text-gray-600 transition-all"
+                      placeholder="50000.00"
+                      required
+                    />
+                  </div>
+                  {targetPrice && (
+                    <p className="mt-1 text-xs text-gray-500">
+                      Formatado: <span className="text-[#00ff88] font-semibold">${parseFloat(targetPrice).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -199,10 +220,10 @@ export default function Dashboard() {
                   <select
                     value={condition}
                     onChange={(e) => setCondition(parseInt(e.target.value))}
-                    className="w-full px-4 py-3 bg-[#0a0e0d] border border-gray-700 rounded-xl focus:ring-2 focus:ring-[#00ff88] focus:border-[#00ff88] text-white transition-all"
+                    className="w-full px-4 py-3 bg-[#0a0e0d] border border-gray-700 rounded-xl focus:ring-2 focus:ring-[#00ff88] focus:border-[#00ff88] text-white transition-all appearance-none cursor-pointer"
                   >
-                    <option value={1}>Acima do preço</option>
-                    <option value={2}>Abaixo do preço</option>
+                    <option value={1}>📈 Acima do preço</option>
+                    <option value={2}>📉 Abaixo do preço</option>
                   </select>
                 </div>
               </div>
